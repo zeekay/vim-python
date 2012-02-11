@@ -14,33 +14,34 @@ sys.path.append(vim.eval("expand('<sfile>:p:h')")  + '/libs/')
 import ropevim
 
 # add cwd to syspath
-try:
-    VIM_CWD = os.path.dirname(vim.current.buffer.name)
-except AttributeError:
-    import os
-    VIM_CWD = os.getcwd()
-sys.path.insert(0, VIM_CWD)
+sys.path.insert(0, vim.eval('getcwd()'))
 
-# gf jumps to filename under cursor, point at import statement to jump to it
-for p in sys.path:
-    if os.path.isdir(p):
-        vim.command(r"set path+=%s" % (p.replace(" ", r"\ ")))
+# Add paths in sys.path to vim path
+# for p in sys.path:
+#     if os.path.isdir(p):
+#         vim.command(r"set path+=%s" % (p.replace(" ", r"\ ")))
 EOF
 
 function! s:PythonRunBuffer()
-    pclose! " force preview window closed
-    setlocal ft=python
+    if exists('g:virtualenv_name')
+        let cmd = 'source '.g:virtualenv_directory.'/'.g:virtualenv_name.'/bin/activate && python '.expand('%:p')
+    else
+        let cmd = 'python '.expand('%:p')
+    endif
 
-" copy the buffer into a new window, then run that buffer through python
-    silent %y a | below 10 new | silent put a | silent %!python -
-
-" indicate the output window as the current previewwindow
-    setlocal previewwindow ro nomodifiable nomodified
-" nnoremap <buffer> <silent> q :bd<CR>
-    nnoremap <silent> q :bd<CR>
-
-" back into the original window
-    winc p
+    pclose
+    botright 10 new
+    setlocal buftype=nofile bufhidden=delete noswapfile nowrap previewwindow
+    redraw
+    try
+        silent exec '0r!'.cmd
+    catch /.*/
+        close
+        echoerr 'Command fail: '.cmd
+    endtry
+    redraw
+    normal gg
+    wincmd p
 endfunction
 
 command! PythonRunBuffer call s:PythonRunBuffer()
