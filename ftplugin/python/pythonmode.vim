@@ -17,9 +17,9 @@ import ropevim
 sys.path.insert(0, vim.eval('getcwd()'))
 
 # Add paths in sys.path to vim path
-# for p in sys.path:
-#     if os.path.isdir(p):
-#         vim.command(r"set path+=%s" % (p.replace(" ", r"\ ")))
+for p in sys.path:
+    if os.path.isdir(p):
+        vim.command(r"set path+=%s" % (p.replace(" ", r"\ ")))
 EOF
 
 function! s:PythonRunBuffer()
