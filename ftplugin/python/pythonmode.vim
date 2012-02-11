@@ -1,10 +1,26 @@
-if !exists("g:pythonmode_loaded")
-python << EOF
+if !exists("g:vimpythonmode_loaded")
+    let g:vimpythonmode_loaded = 1
+else
+    finish
+endif
 
-# initialze rope
-import sys, vim
+python << EOF
+import os
+import sys
+import vim
+
+# add ropevim libs to sys.path
 sys.path.append(vim.eval("expand('<sfile>:p:h')")  + '/libs/')
 import ropevim
+
+
+# add cwd to syspath
+try:
+    VIM_CWD = os.path.dirname(vim.current.buffer.name)
+except AttributeError:
+    import os
+    VIM_CWD = os.getcwd()
+sys.path.insert(0, VIM_CWD)
 
 def find_virtualenv(start):
     '''
@@ -25,7 +41,7 @@ def PythonActivateVirtualenv():
     '''
     Activates virtualenv.
     '''
-    venv = os.environ['VIRTUAL_ENV'] or find_virtualenv(os.path.dirname(vim.current.buffer.name))
+    venv = os.environ['VIRTUAL_ENV'] or find_virtualenv(VIM_CWD)
     if not venv:
         return vim.command('echo "Virtualenv not found!"')
 
@@ -39,16 +55,11 @@ def PythonActivateVirtualenv():
 if 'VIRTUAL_ENV' in os.environ:
     PythonActivateVirtualenv()
 
-# add cwd to syspath
-sys.path.insert(0, os.path.dirname(vim.current.buffer.name))
-
 # gf jumps to filename under cursor, point at import statement to jump to it
 for p in sys.path:
     if os.path.isdir(p):
         vim.command(r"set path+=%s" % (p.replace(" ", r"\ ")))
-
 EOF
-let g:pythonmode_loaded = 1
 
 function! s:PythonRunBuffer()
     pclose! " force preview window closed
@@ -78,6 +89,3 @@ let g:ropevim_autoimport_modules = ["os", "shutil"]
 imap <buffer><Nul> <M-/>
 imap <buffer><C-Space> <M-/>
 map <leader>r :PythonRunBuffer<cr>
-
-endif
-
