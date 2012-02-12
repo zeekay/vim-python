@@ -8,6 +8,14 @@ if !exists('g:pythonmode_enable_rope')
    let g:pythonmode_enable_rope = 0
 endif
 
+if !exists('g:pythonmode_enable_rope')
+   let g:pythonmode_enable_rope = 0
+endif
+
+if !exists('g:virtualenv_directory')
+    let g:virtualenv_directory = 0
+endif
+
 python << EOF
 import os
 import sys
@@ -25,7 +33,47 @@ if vim.eval('g:pythonmode_enable_rope'):
     # Enable ropevim
     sys.path.append(vim.eval("expand('<sfile>:p:h')")  + '/libs/')
     import ropevim
+
+def find_virtualenv(path):
+    '''
+    Work our way up trying to find enclosing virtualenv.
+    '''
+    def is_virtualenv(path):
+        if os.path.exists(os.path.join(path, 'bin/activate_this.py')):
+            return True
+        return False
+
+    while not is_virtualenv(path) and path != '/':
+        path = os.path.abspath(os.path.join(path, '..'))
+
+    if path != '/':
+        return path
+
+def activate_virtualenv(venv=None):
+    '''
+    Activates virtualenv.
+    '''
+    venv_dir = vim.eval('expand(g:virtualenv_directory)') or vim.eval('getcwd()')
+    if venv:
+        venv = os.path.join(venv_dir, venv)
+    else:
+        venv = find_virtualenv(venv_dir)
+
+    if not os.path.exists(venv):
+        return vim.command('echo "Virtualenv not found!"')
+
+    sys.path.insert(0, venv)
+    activate_this = os.path.join(venv, 'bin/activate_this.py')
+    execfile(activate_this, dict(__file__=activate_this))
+    # save env name to g:pythonvirtualenv var
+    os.environ['VIRTUAL_ENV'] = os.path.basename(venv)
+
+# activate virtualenv
+if 'VIRTUAL_ENV' in os.environ:
+    activate_virtualenv(os.environ['VIRTUAL_ENV'])
 EOF
+
+command! -nargs=? ActivateVirtualenv py activate_virtualenv(<f-args>)
 
 function! s:RunBuffer(...)
     let fn = expand('%:p')
@@ -78,5 +126,3 @@ if g:pythonmode_enable_rope
     imap <buffer><Nul> <M-/>
     imap <buffer><C-Space> <M-/>
 endif
-
-
