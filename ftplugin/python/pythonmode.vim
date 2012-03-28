@@ -49,7 +49,7 @@ def find_virtualenv(path):
     if path != '/':
         return path
 
-def activate_virtualenv(venv=None):
+def virtualenv_activate(venv=None):
     '''
     Activates virtualenv.
     '''
@@ -73,9 +73,9 @@ if 'VIRTUAL_ENV' in os.environ:
     activate_virtualenv(os.environ['VIRTUAL_ENV'])
 EOF
 
-command! -nargs=? ActivateVirtualenv py activate_virtualenv(<f-args>)
+command! -nargs=? VirtualenvActivate py virtualenv_activate(<f-args>)
 
-function! s:RunBuffer(...)
+function! s:PythonRunBuffer(...)
     let fn = expand('%:p')
     if fn == ''
         echoerr 'Save buffer to file first'
@@ -113,9 +113,9 @@ function! s:RunBuffer(...)
     wincmd p
 endfunction
 
-command! -nargs=* RunBuffer call s:RunBuffer(<args>)
+command! -nargs=* PythonRunBuffer call s:PythonRunBuffer(<args>)
 
-map <leader>r :RunBuffer<cr>
+map <leader>r :PythonRunBuffer<cr>
 
 if g:pythonmode_enable_rope
     let g:ropevim_codeassist_maxfixes=10
