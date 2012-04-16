@@ -70,7 +70,7 @@ def virtualenv_activate(venv=None):
 
 # activate virtualenv
 if 'VIRTUAL_ENV' in os.environ:
-    activate_virtualenv(os.environ['VIRTUAL_ENV'])
+    virtualenv_activate(os.environ['VIRTUAL_ENV'])
 EOF
 
 command! -nargs=? VirtualenvActivate py virtualenv_activate(<f-args>)
