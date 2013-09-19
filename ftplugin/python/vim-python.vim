@@ -1,15 +1,15 @@
-if !exists("g:pythonmode_loaded")
-    let g:pythonmode_loaded = 1
+if !exists("g:vim_python_loaded")
+    let g:vim_python_loaded = 1
 else
     finish
 endif
 
-if !exists('g:pythonmode_enable_rope')
-   let g:pythonmode_enable_rope = 0
+if !exists('g:vim_python_enable_rope')
+   let g:vim_python_enable_rope = 0
 endif
 
-if !exists('g:pythonmode_enable_rope')
-   let g:pythonmode_enable_rope = 0
+if !exists('g:vim_python_enable_rope')
+   let g:vim_python_enable_rope = 0
 endif
 
 if !exists('g:virtualenv_directory')
@@ -29,7 +29,7 @@ for p in sys.path:
     if os.path.isdir(p):
         vim.command(r"set path+=%s" % (p.replace(" ", r"\ ")))
 
-if vim.eval('g:pythonmode_enable_rope'):
+if vim.eval('g:vim_python_enable_rope'):
     # Enable ropevim
     sys.path.append(vim.eval("expand('<sfile>:p:h')")  + '/libs/')
     import ropevim
@@ -117,7 +117,7 @@ command! -nargs=* PythonRunBuffer call s:PythonRunBuffer(<args>)
 
 map <leader>r :PythonRunBuffer<cr>
 
-if g:pythonmode_enable_rope
+if g:vim_python_enable_rope
     let g:ropevim_codeassist_maxfixes=10
     let g:ropevim_guess_project=1
     let g:ropevim_vim_completion=1
